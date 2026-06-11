@@ -134,12 +134,24 @@ export default function App() {
   const set = (key, val) => setData((d) => ({ ...d, [key]: val }))
 
   const next = () => setStep((s) => Math.min(s + 1, 8))
-  const back = () => setStep((s) => Math.max(s - 1, 0))
+  const back = () => {
+    // If on debt type (step 3) and user doesn't own property, skip back over mortgage (step 2)
+    if (step === 3 && data.ownsProperty === 'No') {
+      setStep(1)
+    } else {
+      setStep((s) => Math.max(s - 1, 0))
+    }
+  }
 
   // Auto-advance for single-select questions
   const pick = (key, val) => {
     set(key, val)
-    setTimeout(() => setStep((s) => Math.min(s + 1, 8)), 220)
+    // If user selects "No" to property ownership, skip the mortgage question
+    if (key === 'ownsProperty' && val === 'No') {
+      setTimeout(() => setStep(3), 220)
+    } else {
+      setTimeout(() => setStep((s) => Math.min(s + 1, 8)), 220)
+    }
   }
 
   // Google Places autocomplete (graceful fallback if no key)
