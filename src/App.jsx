@@ -56,7 +56,7 @@ const emptyData = {
   creditScore: '',
   fullName: '',
   email: '',
-  mobile: '',
+  mobile: '+61 ',
 }
 
 /* ============================================================
@@ -154,7 +154,7 @@ export default function App() {
     const e = {}
     if (!data.fullName.trim()) e.fullName = 'Required'
     if (!/^\S+@\S+\.\S+$/.test(data.email)) e.email = 'Enter a valid email'
-    if (data.mobile.replace(/\D/g, '').length < 8) e.mobile = 'Enter a valid number'
+    if (!/^\+61[2-9]\d{8}$/.test(data.mobile.replace(/\s/g, ''))) e.mobile = 'Enter a valid Australian number (e.g. +61 400 000 000)'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -344,7 +344,7 @@ export default function App() {
                 <input
                   type="tel"
                   inputMode="tel"
-                  placeholder="0400 000 000"
+                  placeholder="+61 400 000 000"
                   value={data.mobile}
                   onChange={(e) => set('mobile', e.target.value)}
                 />
