@@ -13,33 +13,31 @@ const GOOGLE_MAPS_KEY = ''
 // Brand parameter used on the Meta Pixel Lead event + sent to the webhook
 const BRAND = 'finchecker'
 
-const STORAGE_KEY = 'fincheck_business_loans_v1'
+const STORAGE_KEY = 'fincheck_debt_consolidation_v1'
 
 /* ============================================================
    Survey data
    ============================================================ */
 const SLIDER_MIN = 5000
-const SLIDER_MAX = 1000000
+const SLIDER_MAX = 200000
 const SLIDER_STEP = 5000
 
-const PURPOSE_OPTS = [
-  'Working Capital',
-  'Equipment',
-  'Inventory',
-  'Expansion',
-  'Refinance Debt',
-  'Marketing',
+const DEBT_TYPE_OPTS = [
+  'Credit Cards',
+  'Personal Loans',
+  'Car Loan',
+  'Tax Debt',
+  'Buy Now Pay Later',
   'Other',
 ]
 const TIMING_OPTS = ['ASAP', 'Within 2 weeks', 'Within a month', 'Just exploring']
-const PRIORITY_OPTS = ['Lowest Rate', 'Speed of Funding', 'Loan Amount', 'Repayment Terms']
-const REVENUE_OPTS = [
-  '$0 - $5,000',
-  '$5,000 - $10,000',
-  '$10,000 - $25,000',
-  '$25,000 - $50,000',
-  '$50,000 - $100,000',
-  '$100,000+',
+const PRIORITY_OPTS = ['Lower Repayments', 'Single Monthly Payment', 'Lower Interest Rate', 'Pay Off Faster']
+const INCOME_OPTS = [
+  'Under $2,000',
+  '$2,000 – $4,000',
+  '$4,000 – $7,000',
+  '$7,000 – $10,000',
+  '$10,000+',
 ]
 const CREDIT_OPTS = ['Excellent (720+)', 'Good (680-719)', 'Fair (640-679)', 'Poor (<640)']
 
@@ -55,18 +53,18 @@ const TOTAL_STEPS = 7 // quiz steps (excludes landing + thank-you)
 const fmt = (n) => '$' + Number(n).toLocaleString('en-AU')
 
 const emptyData = {
-  loanAmount: 250000,
-  purpose: '',
+  debtAmount: 20000,
+  debtType: '',
   timing: '',
   priority: '',
   startMonth: '',
   startYear: '',
-  revenue: '',
+  income: '',
   creditScore: '',
   fullName: '',
   email: '',
   mobile: '',
-  businessName: '',
+  employerName: '',
   birthDate: '',
   address: '',
 }
@@ -185,7 +183,7 @@ export default function App() {
     if (!data.fullName.trim()) e.fullName = 'Required'
     if (!/^\S+@\S+\.\S+$/.test(data.email)) e.email = 'Enter a valid email'
     if (data.mobile.replace(/\D/g, '').length < 8) e.mobile = 'Enter a valid number'
-    if (!data.businessName.trim()) e.businessName = 'Required'
+    if (!data.employerName.trim()) e.employerName = 'Required'
     if (!data.birthDate) e.birthDate = 'Required'
     if (!data.address.trim()) e.address = 'Required'
     setErrors(e)
@@ -198,19 +196,19 @@ export default function App() {
 
     const payload = {
       brand: BRAND,
-      loanAmount: data.loanAmount,
-      loanAmountFormatted: fmt(data.loanAmount),
-      purpose: data.purpose,
+      debtAmount: data.debtAmount,
+      debtAmountFormatted: fmt(data.debtAmount),
+      debtType: data.debtType,
       timing: data.timing,
       priority: data.priority,
-      businessStartMonth: data.startMonth,
-      businessStartYear: data.startYear,
-      monthlyRevenue: data.revenue,
+      debtStartMonth: data.startMonth,
+      debtStartYear: data.startYear,
+      monthlyIncome: data.income,
       creditScore: data.creditScore,
       fullName: data.fullName.trim(),
       email: data.email.trim(),
       mobile: data.mobile.trim(),
-      businessName: data.businessName.trim(),
+      employerName: data.employerName.trim(),
       birthDate: data.birthDate,
       address: data.address.trim(),
       pageUrl: window.location.href,
@@ -245,7 +243,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [step])
 
-  const sliderPct = ((data.loanAmount - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100
+  const sliderPct = ((data.debtAmount - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN)) * 100
   const sliderBg = `linear-gradient(to right, var(--blue) 0%, var(--blue) ${sliderPct}%, var(--track) ${sliderPct}%, var(--track) 100%)`
 
   return (
@@ -257,14 +255,14 @@ export default function App() {
           <>
             <div className="hero">
               <h1>
-                Compare Business Loan
+                Struggling With
                 <br />
-                Offers In 30 Seconds
+                Multiple Debts?
               </h1>
-              <p className="sub">Get Access To 100+ Lenders In Minutes</p>
+              <p className="sub">See If You Could Combine Your Debts Into One Simple Monthly Repayment</p>
             </div>
             <div className="card">
-              <h2 className="q-title">How much do you need?</h2>
+              <h2 className="q-title">How much debt do you want to consolidate?</h2>
               <div className="slider-wrap">
                 <input
                   type="range"
@@ -272,18 +270,18 @@ export default function App() {
                   min={SLIDER_MIN}
                   max={SLIDER_MAX}
                   step={SLIDER_STEP}
-                  value={data.loanAmount}
+                  value={data.debtAmount}
                   style={{ background: sliderBg }}
-                  onChange={(e) => set('loanAmount', Number(e.target.value))}
+                  onChange={(e) => set('debtAmount', Number(e.target.value))}
                 />
                 <div className="slider-ends">
                   <span>{fmt(SLIDER_MIN)}</span>
                   <span>{fmt(SLIDER_MAX)}</span>
                 </div>
-                <div className="slider-value">{fmt(data.loanAmount)}</div>
+                <div className="slider-value">{fmt(data.debtAmount)}</div>
               </div>
               <button className="btn btn-block" onClick={next}>
-                Compare Offers
+                See My Options
               </button>
             </div>
           </>
@@ -294,16 +292,16 @@ export default function App() {
 
         {step === 1 && (
           <SelectStep
-            title="What do you need the money for?"
-            options={PURPOSE_OPTS}
-            value={data.purpose}
-            onSelect={(v) => pick('purpose', v)}
+            title="What type of debt are you looking to consolidate?"
+            options={DEBT_TYPE_OPTS}
+            value={data.debtType}
+            onSelect={(v) => pick('debtType', v)}
           />
         )}
 
         {step === 2 && (
           <SelectStep
-            title="When do you need the money?"
+            title="How soon are you looking for relief?"
             options={TIMING_OPTS}
             value={data.timing}
             onSelect={(v) => pick('timing', v)}
@@ -312,7 +310,7 @@ export default function App() {
 
         {step === 3 && (
           <SelectStep
-            title="What's most important for you?"
+            title="What would help you the most right now?"
             options={PRIORITY_OPTS}
             value={data.priority}
             onSelect={(v) => pick('priority', v)}
@@ -321,7 +319,7 @@ export default function App() {
 
         {step === 4 && (
           <div className="card">
-            <h2 className="q-title">When did your business start?</h2>
+            <h2 className="q-title">When did this debt start?</h2>
             <div className="fields">
               <div className="row-2">
                 <div className="field">
@@ -360,18 +358,19 @@ export default function App() {
 
         {step === 5 && (
           <SelectStep
-            title="What's your business revenue?"
-            help="Monthly average for the last 3 months"
-            options={REVENUE_OPTS}
-            value={data.revenue}
+            title="What's your monthly take-home income?"
+            help="This helps us find options that fit your budget"
+            options={INCOME_OPTS}
+            value={data.income}
             cols
-            onSelect={(v) => pick('revenue', v)}
+            onSelect={(v) => pick('income', v)}
           />
         )}
 
         {step === 6 && (
           <SelectStep
             title="What's your estimated credit score?"
+            help="Don't worry — all credit types are considered"
             options={CREDIT_OPTS}
             value={data.creditScore}
             onSelect={(v) => pick('creditScore', v)}
@@ -380,8 +379,8 @@ export default function App() {
 
         {step === 7 && (
           <div className="card">
-            <h2 className="q-title">Where should we send your offers?</h2>
-            <p className="q-help">Your details are kept private and secure</p>
+            <h2 className="q-title">Where should we send your relief options?</h2>
+            <p className="q-help">Takes 30 seconds — your details are kept private and secure</p>
             <div className="fields">
               <div className="field">
                 <label>Full Name</label>
@@ -398,7 +397,7 @@ export default function App() {
                 <input
                   type="email"
                   inputMode="email"
-                  placeholder="john@business.com.au"
+                  placeholder="john@email.com.au"
                   value={data.email}
                   onChange={(e) => set('email', e.target.value)}
                 />
@@ -416,17 +415,17 @@ export default function App() {
                 {errors.mobile && <span className="err">{errors.mobile}</span>}
               </div>
               <div className="field">
-                <label>Business Name</label>
+                <label>Employer Name</label>
                 <input
                   type="text"
-                  placeholder="Your business"
-                  value={data.businessName}
-                  onChange={(e) => set('businessName', e.target.value)}
+                  placeholder="Your employer"
+                  value={data.employerName}
+                  onChange={(e) => set('employerName', e.target.value)}
                 />
-                {errors.businessName && <span className="err">{errors.businessName}</span>}
+                {errors.employerName && <span className="err">{errors.employerName}</span>}
               </div>
               <div className="field">
-                <label>Birth Date</label>
+                <label>Date of Birth</label>
                 <input
                   type="date"
                   value={data.birthDate}
@@ -435,7 +434,7 @@ export default function App() {
                 {errors.birthDate && <span className="err">{errors.birthDate}</span>}
               </div>
               <div className="field">
-                <label>Address</label>
+                <label>Home Address</label>
                 <input
                   ref={addressRef}
                   type="text"
@@ -447,7 +446,7 @@ export default function App() {
               </div>
             </div>
             <button className="btn btn-block btn-center" disabled={submitting} onClick={submit}>
-              {submitting ? 'Submitting…' : 'See My Offers'}
+              {submitting ? 'Submitting…' : 'See My Options'}
             </button>
           </div>
         )}
@@ -472,10 +471,10 @@ export default function App() {
                 />
               </svg>
             </div>
-            <h2>You're all set!</h2>
+            <h2>You're on your way to relief!</h2>
             <p>
-              We're matching you with lenders now. A finance specialist will be in touch shortly to
-              walk you through your offers.
+              We're reviewing your details now. A debt relief specialist will be in touch shortly
+              to walk you through your options and help simplify your repayments.
             </p>
           </div>
         )}
