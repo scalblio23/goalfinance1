@@ -13,7 +13,7 @@ const STORAGE_KEY = 'fincheck_debt_consolidation_v1'
    Survey data
    ============================================================ */
 const SLIDER_MIN = 5000
-const SLIDER_MAX = 500000
+const SLIDER_MAX = 1000000
 const SLIDER_STEP = 5000
 
 const PROPERTY_OPTS = ['Yes', 'No']
@@ -241,9 +241,9 @@ export default function App() {
                 />
                 <div className="slider-ends">
                   <span>{fmt(SLIDER_MIN)}</span>
-                  <span>{fmt(SLIDER_MAX)}</span>
+                  <span>{fmt(SLIDER_MAX)}+</span>
                 </div>
-                <div className="slider-value">{fmt(data.debtAmount)}</div>
+                <div className="slider-value">{fmt(data.debtAmount)}{data.debtAmount === SLIDER_MAX ? '+' : ''}</div>
               </div>
               <button className="btn btn-block" onClick={next}>
                 See My Options
