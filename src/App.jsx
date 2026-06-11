@@ -7,7 +7,7 @@ const WEBHOOK_URL = 'https://hook.eu1.make.com/5ksm3hrj2mvwbpmn49n13uh4kwx2eh6p'
 const GOOGLE_MAPS_KEY = ''
 const BRAND = 'finchecker'
 
-const STORAGE_KEY = 'fincheck_debt_consolidation_v1'
+const STORAGE_KEY = 'fincheck_debt_consolidation_v2'
 
 /* ============================================================
    Survey data
