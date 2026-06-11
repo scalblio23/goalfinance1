@@ -47,7 +47,7 @@ const TOTAL_STEPS = 7
 const fmt = (n) => '$' + Number(n).toLocaleString('en-AU')
 
 const emptyData = {
-  debtAmount: 20000,
+  debtAmount: 50000,
   ownsProperty: '',
   mortgageAmount: '',
   debtType: '',
