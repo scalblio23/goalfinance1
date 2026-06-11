@@ -255,11 +255,11 @@ export default function App() {
           <>
             <div className="hero">
               <h1>
-                Consolidate Your Debt &
+                Struggling With
                 <br />
-                Lower Your Repayments
+                Multiple Debts?
               </h1>
-              <p className="sub">Compare 100+ Lenders & Get One Simple Payment</p>
+              <p className="sub">See If You Could Combine Your Debts Into One Simple Monthly Repayment</p>
             </div>
             <div className="card">
               <h2 className="q-title">How much debt do you want to consolidate?</h2>
@@ -292,7 +292,7 @@ export default function App() {
 
         {step === 1 && (
           <SelectStep
-            title="What type of debt do you have?"
+            title="What type of debt are you looking to consolidate?"
             options={DEBT_TYPE_OPTS}
             value={data.debtType}
             onSelect={(v) => pick('debtType', v)}
@@ -301,7 +301,7 @@ export default function App() {
 
         {step === 2 && (
           <SelectStep
-            title="When do you need help?"
+            title="How soon are you looking for relief?"
             options={TIMING_OPTS}
             value={data.timing}
             onSelect={(v) => pick('timing', v)}
@@ -310,7 +310,7 @@ export default function App() {
 
         {step === 3 && (
           <SelectStep
-            title="What's most important to you?"
+            title="What would help you the most right now?"
             options={PRIORITY_OPTS}
             value={data.priority}
             onSelect={(v) => pick('priority', v)}
@@ -319,7 +319,7 @@ export default function App() {
 
         {step === 4 && (
           <div className="card">
-            <h2 className="q-title">When did you first take on this debt?</h2>
+            <h2 className="q-title">When did this debt start?</h2>
             <div className="fields">
               <div className="row-2">
                 <div className="field">
@@ -358,8 +358,8 @@ export default function App() {
 
         {step === 5 && (
           <SelectStep
-            title="What's your monthly income?"
-            help="After-tax average for the last 3 months"
+            title="What's your monthly take-home income?"
+            help="This helps us find options that fit your budget"
             options={INCOME_OPTS}
             value={data.income}
             cols
@@ -370,6 +370,7 @@ export default function App() {
         {step === 6 && (
           <SelectStep
             title="What's your estimated credit score?"
+            help="Don't worry — all credit types are considered"
             options={CREDIT_OPTS}
             value={data.creditScore}
             onSelect={(v) => pick('creditScore', v)}
@@ -378,8 +379,8 @@ export default function App() {
 
         {step === 7 && (
           <div className="card">
-            <h2 className="q-title">Where should we send your options?</h2>
-            <p className="q-help">Your details are kept private and secure</p>
+            <h2 className="q-title">Where should we send your relief options?</h2>
+            <p className="q-help">Takes 30 seconds — your details are kept private and secure</p>
             <div className="fields">
               <div className="field">
                 <label>Full Name</label>
@@ -470,10 +471,10 @@ export default function App() {
                 />
               </svg>
             </div>
-            <h2>You're all set!</h2>
+            <h2>You're on your way to relief!</h2>
             <p>
-              We're matching you with lenders now. A debt specialist will be in touch shortly to
-              walk you through your consolidation options.
+              We're reviewing your details now. A debt relief specialist will be in touch shortly
+              to walk you through your options and help simplify your repayments.
             </p>
           </div>
         )}
