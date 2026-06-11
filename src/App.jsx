@@ -20,29 +20,18 @@ const STORAGE_KEY = 'fincheck_debt_consolidation_v1'
    ============================================================ */
 const SLIDER_MIN = 5000
 const SLIDER_MAX = 200000
-const SLIDER_STEP = 1000
+const SLIDER_STEP = 5000
 
 const DEBT_TYPE_OPTS = [
   'Credit Cards',
   'Personal Loans',
   'Car Loan',
-  'Medical Bills',
+  'Tax Debt',
   'Buy Now Pay Later',
   'Other',
 ]
 const TIMING_OPTS = ['ASAP', 'Within 2 weeks', 'Within a month', 'Just exploring']
-const PRIORITY_OPTS = [
-  'Lower Repayments',
-  'Single Monthly Payment',
-  'Lower Interest Rate',
-  'Pay Off Faster',
-]
-const EMPLOYMENT_OPTS = [
-  'Full-time Employed',
-  'Part-time Employed',
-  'Self-Employed',
-  'Receiving Benefits',
-]
+const PRIORITY_OPTS = ['Lower Repayments', 'Single Monthly Payment', 'Lower Interest Rate', 'Pay Off Faster']
 const INCOME_OPTS = [
   'Under $2,000',
   '$2,000 – $4,000',
@@ -50,7 +39,14 @@ const INCOME_OPTS = [
   '$7,000 – $10,000',
   '$10,000+',
 ]
-const CREDIT_OPTS = ['Excellent (720+)', 'Good (680–719)', 'Fair (640–679)', 'Poor (<640)']
+const CREDIT_OPTS = ['Excellent (720+)', 'Good (680-719)', 'Fair (640-679)', 'Poor (<640)']
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+]
+const CURRENT_YEAR = new Date().getFullYear()
+const YEARS = Array.from({ length: CURRENT_YEAR - 1989 }, (_, i) => String(CURRENT_YEAR - i))
 
 const TOTAL_STEPS = 7 // quiz steps (excludes landing + thank-you)
 
@@ -61,12 +57,14 @@ const emptyData = {
   debtType: '',
   timing: '',
   priority: '',
-  employment: '',
+  startMonth: '',
+  startYear: '',
   income: '',
   creditScore: '',
   fullName: '',
   email: '',
   mobile: '',
+  employerName: '',
   birthDate: '',
   address: '',
 }
@@ -185,6 +183,7 @@ export default function App() {
     if (!data.fullName.trim()) e.fullName = 'Required'
     if (!/^\S+@\S+\.\S+$/.test(data.email)) e.email = 'Enter a valid email'
     if (data.mobile.replace(/\D/g, '').length < 8) e.mobile = 'Enter a valid number'
+    if (!data.employerName.trim()) e.employerName = 'Required'
     if (!data.birthDate) e.birthDate = 'Required'
     if (!data.address.trim()) e.address = 'Required'
     setErrors(e)
@@ -202,12 +201,14 @@ export default function App() {
       debtType: data.debtType,
       timing: data.timing,
       priority: data.priority,
-      employment: data.employment,
+      debtStartMonth: data.startMonth,
+      debtStartYear: data.startYear,
       monthlyIncome: data.income,
       creditScore: data.creditScore,
       fullName: data.fullName.trim(),
       email: data.email.trim(),
       mobile: data.mobile.trim(),
+      employerName: data.employerName.trim(),
       birthDate: data.birthDate,
       address: data.address.trim(),
       pageUrl: window.location.href,
@@ -261,7 +262,7 @@ export default function App() {
               <p className="sub">Compare 100+ Lenders & Get One Simple Payment</p>
             </div>
             <div className="card">
-              <h2 className="q-title">How much debt do you have?</h2>
+              <h2 className="q-title">How much debt do you want to consolidate?</h2>
               <div className="slider-wrap">
                 <input
                   type="range"
@@ -317,18 +318,48 @@ export default function App() {
         )}
 
         {step === 4 && (
-          <SelectStep
-            title="What's your employment status?"
-            options={EMPLOYMENT_OPTS}
-            value={data.employment}
-            onSelect={(v) => pick('employment', v)}
-          />
+          <div className="card">
+            <h2 className="q-title">When did you first take on this debt?</h2>
+            <div className="fields">
+              <div className="row-2">
+                <div className="field">
+                  <label>Month</label>
+                  <select value={data.startMonth} onChange={(e) => set('startMonth', e.target.value)}>
+                    <option value="">Select month</option>
+                    {MONTHS.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Year</label>
+                  <select value={data.startYear} onChange={(e) => set('startYear', e.target.value)}>
+                    <option value="">Select year</option>
+                    {YEARS.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn btn-center"
+              disabled={!data.startMonth || !data.startYear}
+              onClick={next}
+            >
+              Continue
+            </button>
+          </div>
         )}
 
         {step === 5 && (
           <SelectStep
             title="What's your monthly income?"
-            help="After tax (approximate)"
+            help="After-tax average for the last 3 months"
             options={INCOME_OPTS}
             value={data.income}
             cols
@@ -365,7 +396,7 @@ export default function App() {
                 <input
                   type="email"
                   inputMode="email"
-                  placeholder="john@email.com"
+                  placeholder="john@email.com.au"
                   value={data.email}
                   onChange={(e) => set('email', e.target.value)}
                 />
@@ -381,6 +412,16 @@ export default function App() {
                   onChange={(e) => set('mobile', e.target.value)}
                 />
                 {errors.mobile && <span className="err">{errors.mobile}</span>}
+              </div>
+              <div className="field">
+                <label>Employer Name</label>
+                <input
+                  type="text"
+                  placeholder="Your employer"
+                  value={data.employerName}
+                  onChange={(e) => set('employerName', e.target.value)}
+                />
+                {errors.employerName && <span className="err">{errors.employerName}</span>}
               </div>
               <div className="field">
                 <label>Date of Birth</label>
