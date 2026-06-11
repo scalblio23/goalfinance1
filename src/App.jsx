@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 /* ============================================================
    CONFIG — replace these two values
@@ -13,7 +13,7 @@ const STORAGE_KEY = 'fincheck_debt_consolidation_v1'
    Survey data
    ============================================================ */
 const SLIDER_MIN = 5000
-const SLIDER_MAX = 200000
+const SLIDER_MAX = 500000
 const SLIDER_STEP = 5000
 
 const PROPERTY_OPTS = ['Yes', 'No']
@@ -29,16 +29,16 @@ const DEBT_TYPE_OPTS = [
   'Personal Loans',
   'Car Loan',
   'Tax Debt',
-  'Buy Now Pay Later',
+  'Multiple',
   'Other',
 ]
 const TIMING_OPTS = ['ASAP', 'Within 2 weeks', 'Within a month', 'Just exploring']
 const INCOME_OPTS = [
-  'Under $2,000',
-  '$2,000 – $4,000',
-  '$4,000 – $7,000',
-  '$7,000 – $10,000',
-  '$10,000+',
+  'Under $30,000',
+  '$30,000 – $60,000',
+  '$60,000 – $100,000',
+  '$100,000 – $150,000',
+  '$150,000+',
 ]
 const CREDIT_OPTS = ['Excellent (720+)', 'Good (680–719)', 'Fair (640–679)', 'Poor (<640)']
 
@@ -57,9 +57,6 @@ const emptyData = {
   fullName: '',
   email: '',
   mobile: '',
-  employerName: '',
-  birthDate: '',
-  address: '',
 }
 
 /* ============================================================
@@ -109,7 +106,6 @@ export default function App() {
   const [data, setData] = useState(emptyData)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
-  const addressRef = useRef(null)
 
   // Restore from localStorage
   useEffect(() => {
@@ -154,43 +150,11 @@ export default function App() {
     }
   }
 
-  // Google Places autocomplete (graceful fallback if no key)
-  useEffect(() => {
-    if (step !== 7 || !GOOGLE_MAPS_KEY) return
-    const attach = () => {
-      if (!addressRef.current || !window.google?.maps?.places) return
-      const ac = new window.google.maps.places.Autocomplete(addressRef.current, {
-        componentRestrictions: { country: 'au' },
-        fields: ['formatted_address'],
-        types: ['address'],
-      })
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace()
-        if (place?.formatted_address) set('address', place.formatted_address)
-      })
-    }
-    if (window.google?.maps?.places) {
-      attach()
-    } else if (!document.getElementById('gmaps-script')) {
-      const s = document.createElement('script')
-      s.id = 'gmaps-script'
-      s.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&libraries=places`
-      s.async = true
-      s.onload = attach
-      document.head.appendChild(s)
-    } else {
-      document.getElementById('gmaps-script').addEventListener('load', attach)
-    }
-  }, [step])
-
   const validateContact = () => {
     const e = {}
     if (!data.fullName.trim()) e.fullName = 'Required'
     if (!/^\S+@\S+\.\S+$/.test(data.email)) e.email = 'Enter a valid email'
     if (data.mobile.replace(/\D/g, '').length < 8) e.mobile = 'Enter a valid number'
-    if (!data.employerName.trim()) e.employerName = 'Required'
-    if (!data.birthDate) e.birthDate = 'Required'
-    if (!data.address.trim()) e.address = 'Required'
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -207,14 +171,11 @@ export default function App() {
       mortgageAmount: data.mortgageAmount,
       debtType: data.debtType,
       timing: data.timing,
-      monthlyIncome: data.income,
+      annualIncome: data.income,
       creditScore: data.creditScore,
       fullName: data.fullName.trim(),
       email: data.email.trim(),
       mobile: data.mobile.trim(),
-      employerName: data.employerName.trim(),
-      birthDate: data.birthDate,
-      address: data.address.trim(),
       pageUrl: window.location.href,
       submittedAt: new Date().toISOString(),
     }
@@ -333,7 +294,7 @@ export default function App() {
 
         {step === 5 && (
           <SelectStep
-            title="What's your monthly take-home income?"
+            title="What's your annual income?"
             help="This helps us find options that fit your budget"
             options={INCOME_OPTS}
             value={data.income}
@@ -388,36 +349,6 @@ export default function App() {
                   onChange={(e) => set('mobile', e.target.value)}
                 />
                 {errors.mobile && <span className="err">{errors.mobile}</span>}
-              </div>
-              <div className="field">
-                <label>Employer Name</label>
-                <input
-                  type="text"
-                  placeholder="Your employer"
-                  value={data.employerName}
-                  onChange={(e) => set('employerName', e.target.value)}
-                />
-                {errors.employerName && <span className="err">{errors.employerName}</span>}
-              </div>
-              <div className="field">
-                <label>Date of Birth</label>
-                <input
-                  type="date"
-                  value={data.birthDate}
-                  onChange={(e) => set('birthDate', e.target.value)}
-                />
-                {errors.birthDate && <span className="err">{errors.birthDate}</span>}
-              </div>
-              <div className="field">
-                <label>Home Address</label>
-                <input
-                  ref={addressRef}
-                  type="text"
-                  placeholder="Start typing your address"
-                  value={data.address}
-                  onChange={(e) => set('address', e.target.value)}
-                />
-                {errors.address && <span className="err">{errors.address}</span>}
               </div>
             </div>
             <button className="btn btn-block btn-center" disabled={submitting} onClick={submit}>
